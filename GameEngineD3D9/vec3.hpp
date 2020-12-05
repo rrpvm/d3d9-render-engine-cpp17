@@ -8,6 +8,7 @@ public:
 	float z;
 	vec3() { this->x = 0.0f; this->y = 0.0f; this->z = 0.0f; };
 	vec3(float X, float Y, float Z) :x(X), y(Y),z(Z) {};
+	vec3(float X, float Y) :x(X), y(Y),z(0) {};
 	inline vec3& operator+(const vec3& other)  noexcept;
 	inline vec3& operator-(const vec3& other)  noexcept;
 	inline vec3& operator*(const vec3& other)  noexcept;

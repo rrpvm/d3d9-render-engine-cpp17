@@ -2,10 +2,9 @@
 #include "WindowManager.hpp"
 #include "renderer.hpp"
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow){
-	WindowManager wm;
 	MSG         msg;
-	HWND hWnd = wm.create_window("Qwerty", vec2(CW_USEDEFAULT, CW_USEDEFAULT), vec2(1280, 720), hInstance);
-	render->initialize(hWnd, vec2(1280, 720));
+	HWND hWnd = wnd_manager->create_window("Qwerty", vec2(CW_USEDEFAULT, CW_USEDEFAULT), vec2(1920, 1080), hInstance);
+	render->initialize(hWnd, vec2(1920, 1080));
 
 	while (true)
 	{

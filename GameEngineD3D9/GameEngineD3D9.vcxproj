@@ -145,6 +145,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DebugUI.h" />
+    <ClInclude Include="GCheckBox.hpp" />
+    <ClInclude Include="GChild.hpp" />
+    <ClInclude Include="Gui2D.h" />
+    <ClInclude Include="GUI2D\GComponent.hpp" />
+    <ClInclude Include="GUI2D\GInput.hpp" />
+    <ClInclude Include="GUI2D\GRenderable.hpp" />
+    <ClInclude Include="GUI2D\GuiDrawManager.hpp" />
+    <ClInclude Include="GUI2D\GWindow.hpp" />
     <ClInclude Include="helpers\Color.hpp" />
     <ClInclude Include="helpers\container.hpp" />
     <ClInclude Include="math\vec2.hpp" />
@@ -153,7 +162,16 @@
     <ClInclude Include="WindowManager.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DebugUI.cpp" />
     <ClCompile Include="entry_point.cpp" />
+    <ClCompile Include="GCheckBox.cpp" />
+    <ClCompile Include="GChild.cpp" />
+    <ClCompile Include="GInput.cpp" />
+    <ClCompile Include="GRenderable.cpp" />
+    <ClCompile Include="Gui2D.cpp" />
+    <ClCompile Include="GUI2D\GComponent.cpp" />
+    <ClCompile Include="GUI2D\GuiDrawManager.cpp" />
+    <ClCompile Include="GUI2D\GWindow.cpp" />
     <ClCompile Include="math\vec2.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="vec3.cpp" />

@@ -13,6 +13,21 @@ LRESULT CALLBACK WindowProc(
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
+  
+    case WM_MOUSEMOVE: {
+        g_input->g_mouse.x = (signed short)(lParam);
+        g_input->g_mouse.y = (signed short)(lParam >> 16);
+        return true;
+    }
+    case WM_LBUTTONDOWN: {
+        g_input->click_per_frame = true;
+        return true;
+    }
+    case WM_LBUTTONUP: {
+        g_input->click_per_frame = false;
+        g_input->last_tick_lkm_pressed = false;
+        return true;
+    }
     default:
         return DefWindowProcA(hwnd, uMsg, wParam, lParam);
     }

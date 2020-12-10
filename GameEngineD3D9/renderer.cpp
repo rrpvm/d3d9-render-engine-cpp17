@@ -2,6 +2,7 @@
 #include <d3d9types.h>
 #include <d3dx9math.h>
 #include "helpers/container.hpp"
+#include "Gui2D.h"
 bool renderer::initialize(const HWND& hwnd, const vec2& size)
 {
     assert(this->d3d9_object.get());
@@ -11,8 +12,8 @@ bool renderer::initialize(const HWND& hwnd, const vec2& size)
     d3dpp.BackBufferHeight = (int)size.y;
     d3dpp.BackBufferFormat = D3DFMT_X8R8G8B8;
     d3dpp.BackBufferCount = 1;
-    d3dpp.MultiSampleType = D3DMULTISAMPLE_NONE;
-    d3dpp.MultiSampleQuality = 0;
+    d3dpp.MultiSampleType = D3DMULTISAMPLE_4_SAMPLES;
+    d3dpp.MultiSampleQuality =0;
     d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
     d3dpp.hDeviceWindow = hwnd;
     d3dpp.Windowed = true;
@@ -24,15 +25,20 @@ bool renderer::initialize(const HWND& hwnd, const vec2& size)
     IDirect3DDevice9* d3d9_tmp = nullptr;
     IDirect3DVertexBuffer9* vertex_buffer_tmp = nullptr;
     IDirect3DIndexBuffer9* index_buffer_tmp = nullptr;
+    ID3DXFont* d3d9_fnt_ = nullptr;
     HRESULT hr = this->d3d9_object->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &d3d9_tmp);
     assert(d3d9_tmp);
     this->d3d9_device = std::unique_ptr<IDirect3DDevice9>(d3d9_tmp);
-    this->d3d9_device->CreateVertexBuffer(max_vertex_count * sizeof(CUSTOMVERTEX), 0, CUSTOMFVF, D3DPOOL_MANAGED, &vertex_buffer_tmp, nullptr);
+    this->d3d9_device->CreateVertexBuffer(max_vertex_count * sizeof(CUSTOMVERTEX), D3DUSAGE_WRITEONLY, CUSTOMFVF, D3DPOOL_MANAGED, &vertex_buffer_tmp, nullptr);
     this->d3d9_device->CreateIndexBuffer(256 * sizeof(short), 0,D3DFMT_INDEX16,D3DPOOL_MANAGED,&index_buffer_tmp, NULL);
+    D3DXCreateFontA(this->d3d9_device.get(), 18, 0, 400, 2, false, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY, 0, "Times New Roman", &d3d9_fnt_);
     this->vertex_buffer = std::unique_ptr<IDirect3DVertexBuffer9>(vertex_buffer_tmp);
     this->index_buffer = std::unique_ptr<IDirect3DIndexBuffer9>(index_buffer_tmp);
+    this->d3d9font_tnr_normal = std::unique_ptr<ID3DXFont>(d3d9_fnt_);
     assert(vertex_buffer_tmp); 
     assert(index_buffer_tmp);
+    assert(d3d9_fnt_);
+    gui_2d->init(this->d3d9_device.get());  
     return SUCCEEDED(hr);
 }
 void renderer::begin_frame()
@@ -42,7 +48,52 @@ void renderer::begin_frame()
     this->d3d9_device->Clear(0l, nullptr, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
     d3d9_device->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
     this->set_frame_settings();
-    this->set_viewport();  
+    this->set_viewport(); 
+    static D3DVIEWPORT9 vp{ 0, 0, this->screen_resolution.x, this->screen_resolution.y, 0, 1 };
+    this->d3d9_device->SetViewport(&vp);
+
+    static const vec3 pole_rect[2] = { {-6.0f, -6.0f,-25.0f},{6.f, 6.f, -25.0f} };
+    int pole_counter = 0;
+
+
+
+ 
+    gui_2d->render_frame();
+
+   /* for (float i = 0.0f; i < 9; i++)
+    {
+       static const float offsetX = 12.f/9.f;
+       static const float offsetY = 12.f/9.f;
+       float x = -6.0f + offsetX * i;
+       for (float j = 0.0f; j < 9; j++)
+       {
+           float y = -6.0f + offsetY * j;
+           this->draw_rectangle_filled(vec3(x, y, -25.0f), vec3(12.f / 9.f, 12.f / 9.f),  pole_counter % 2== 0 ? Color(255,255,255):Color(0, 0, 0));
+           pole_counter++;
+       }           
+    }
+    this->draw_rectangle(pole_rect[0], vec3(12.f, 12.f, -25.f), Color::red());*/
+    
+ /*   D3DMATERIAL9 red;
+    red.Diffuse = D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f); // red
+    red.Ambient = D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f); // red
+    red.Specular = D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f); // red
+    red.Emissive = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f); // no emission
+    red.Power = 5.0f;
+
+    this->d3d9_device->SetMaterial(&red);
+    ID3DXMesh* mesh = 0;
+    D3DXCreateSphere(d3d9_device.get(), 1.2f, 20, 20, &mesh, 0);
+    mesh->DrawSubset(0);
+    
+    mesh->Release();*/
+   /* D3DMATERIAL9 red;
+    ZeroMemory(&red, sizeof(red));
+    red.Diffuse = D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f); // red
+    red.Ambient = D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f); // red
+    red.Specular = D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f); // red
+    red.Emissive = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f); // no emission
+    red.Power = 5.0f;*/
 }
 void renderer::end_frame()
 {
@@ -50,22 +101,32 @@ void renderer::end_frame()
     this->d3d9_device->EndScene();
     this->d3d9_device->Present(NULL, NULL, NULL, NULL);
 }
+D3DMATERIAL9& renderer::init_mat(const ColorF& ambient)
+{
+    D3DMATERIAL9 tmp;
+    tmp.Ambient = D3DXCOLOR(ambient.r, ambient.g, ambient.b, ambient.a);
+    return tmp;
+}
 void renderer::set_frame_settings()
 {
     this->d3d9_device->SetFVF(CUSTOMFVF);
     this->d3d9_device->SetStreamSource(0, nullptr, 0, 0);
-    d3d9_device->SetRenderState(D3DRS_LIGHTING, FALSE);
+    d3d9_device->SetRenderState(D3DRS_LIGHTING, FALSE);//TRUE
     d3d9_device->SetRenderState(D3DRS_ZENABLE, TRUE);
     this->d3d9_device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
   // this->d3d9_device->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
     this->d3d9_device->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
+    this->d3d9_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+    this->d3d9_device->SetRenderState(D3DRS_POINTSIZE, 5.f);
+    this->d3d9_device->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+    this->d3d9_device->SetRenderState(D3DRS_SPECULARENABLE, true);
 }
 void renderer::set_viewport()
 {
     D3DXMatrixLookAtLH(&this->matrix_view,
         &D3DXVECTOR3(this->camera_position.x, this->camera_position.y, this->camera_position.z),    // the camera position
         &D3DXVECTOR3(0.0f, 0.0f, 0.0f),    // the look-at position
-        &D3DXVECTOR3(0.0f, 1.0f, 1.0f));    // the up direction
+        &D3DXVECTOR3(0.0f, 1.0f, 0.0f));    // the up direction
     d3d9_device->SetTransform(D3DTS_VIEW, &this->matrix_view);
     D3DXMatrixPerspectiveFovLH(&this->matrix_projection,
         D3DXToRadian(this->camera_fov),    // the horizontal field of view
@@ -74,7 +135,7 @@ void renderer::set_viewport()
         this->camera_max_view_distance);    // the far view-plane
     d3d9_device->SetTransform(D3DTS_PROJECTION, &matrix_projection);    // set the projection*/
 }
-void renderer::draw_rectangle(const vec2& position, const vec2& size, const Color& color)
+void renderer::draw_rectangle_filled(const vec2& position, const vec2& size, const Color& color)
 {
     const DWORD d_color = color.to_dword();
     CUSTOMVERTEX* verticies = new CUSTOMVERTEX[4];
@@ -94,7 +155,7 @@ void renderer::draw_rectangle(const vec2& position, const vec2& size, const Colo
     delete[]verticies;
     verticies = nullptr;
 }
-void renderer::draw_rectangle(const vec2& position, const vec2& size, const Color& c1, const Color& c2, const Color& c3, const Color& c4)
+void renderer::draw_rectangle_filled(const vec2& position, const vec2& size, const Color& c1, const Color& c2, const Color& c3, const Color& c4)
 {
     CUSTOMVERTEX* verticies = new CUSTOMVERTEX[4];
     verticies[0] = { position.x, position.y, 0.f,  c1.to_dword() };
@@ -113,7 +174,7 @@ void renderer::draw_rectangle(const vec2& position, const vec2& size, const Colo
     delete[]verticies;
     verticies = nullptr;
 }
-void renderer::draw_rectangle(const vec2& position, const vec2& size, const Color& c1, const Color& c2)
+void renderer::draw_rectangle_filled(const vec2& position, const vec2& size, const Color& c1, const Color& c2)
 {
     CUSTOMVERTEX* verticies = new CUSTOMVERTEX[4];
     verticies[0] = { position.x, position.y, 0.f, c2.to_dword() };
@@ -132,7 +193,7 @@ void renderer::draw_rectangle(const vec2& position, const vec2& size, const Colo
     delete[]verticies;
     verticies = nullptr;
 }
-void renderer::draw_rectangle(const vec3& position, const vec3& size, const Color& color)
+void renderer::draw_rectangle_filled(const vec3& position, const vec3& size, const Color& color)
 {
     const DWORD d_color = color.to_dword();
     CUSTOMVERTEX* verticies = new CUSTOMVERTEX[4];
@@ -152,7 +213,7 @@ void renderer::draw_rectangle(const vec3& position, const vec3& size, const Colo
     delete[]verticies;
     verticies = nullptr;
 }
-void renderer::draw_rectangle(const vec3& position, const vec3& size, const Color& c1, const Color& c2, const Color& c3, const Color& c4)
+void renderer::draw_rectangle_filled(const vec3& position, const vec3& size, const Color& c1, const Color& c2, const Color& c3, const Color& c4)
 {
     CUSTOMVERTEX* verticies = new CUSTOMVERTEX[4];
     verticies[0] = { position.x, position.y, position.z,  c1.to_dword() };
@@ -171,7 +232,7 @@ void renderer::draw_rectangle(const vec3& position, const vec3& size, const Colo
     delete[]verticies;
     verticies = nullptr;
 }
-void renderer::draw_rectangle(const vec3& position, const vec3& size, const Color& c1, const Color& c2)
+void renderer::draw_rectangle_filled(const vec3& position, const vec3& size, const Color& c1, const Color& c2)
 {
     CUSTOMVERTEX* verticies = new CUSTOMVERTEX[4];
     verticies[0] = { position.x, position.y, position.z, c2.to_dword() };
@@ -186,6 +247,73 @@ void renderer::draw_rectangle(const vec3& position, const vec3& size, const Colo
     p_lock = nullptr;
     this->d3d9_device->SetStreamSource(0, this->vertex_buffer.get(), 0, sizeof(CUSTOMVERTEX));
     this->d3d9_device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
+    this->d3d9_device->SetStreamSource(0, nullptr, 0, 0);
+    delete[]verticies;
+    verticies = nullptr;
+}
+void renderer::draw_rectangle(const vec3& position, const vec3& size, const Color& color)
+{
+    const DWORD d_color = color.to_dword();
+    CUSTOMVERTEX* verticies = new CUSTOMVERTEX[5];
+    verticies[0] = { position.x, position.y, position.z,  d_color };
+    verticies[1] = { position.x + size.x, position.y, position.z,  d_color };
+    verticies[2] = { position.x + size.x, position.y + size.y, position.z,  d_color };
+    verticies[3] = { position.x , position.y + size.y, position.z,  d_color };
+    verticies[4] = { position.x , position.y , position.z,  d_color };
+    void* p_lock = nullptr;
+    this->vertex_buffer->Lock(0, 0, (void**)&p_lock, 0);
+    memcpy(p_lock, verticies, sizeof(CUSTOMVERTEX) * 5);
+    this->vertex_buffer->Unlock();
+    p_lock = nullptr;
+    this->d3d9_device->SetStreamSource(0, this->vertex_buffer.get(), 0, sizeof(CUSTOMVERTEX));
+    this->d3d9_device->DrawPrimitive(D3DPT_LINESTRIP, 0, 4);
+    this->d3d9_device->SetStreamSource(0, nullptr, 0, 0);
+    delete[]verticies;
+    verticies = nullptr;
+}
+void renderer::draw_rectangle(const vec3& position, const vec3& size, const Color& c1, const Color& c2, const Color& c3, const Color& c4)
+{
+    
+  
+    CUSTOMVERTEX* verticies = new CUSTOMVERTEX[8];
+    verticies[0] = { position.x, position.y, position.z,  c1.to_dword() };
+    verticies[1] = { position.x + size.x, position.y, position.z,   c1.to_dword() };
+
+    verticies[2] = { position.x + size.x, position.y, position.z,   c2.to_dword() };
+    verticies[3] = { position.x + size.x, position.y + size.y, position.z,   c2.to_dword() };
+
+    verticies[4] = { position.x + size.x, position.y + size.y, position.z,   c3.to_dword() };
+    verticies[5] = { position.x , position.y + size.y, position.z,   c3.to_dword() };
+
+
+    verticies[6] = { position.x , position.y + size.y, position.z,   c4.to_dword() };
+    verticies[7] = { position.x , position.y, position.z,   c4.to_dword() };
+    void* p_lock = nullptr;
+    this->vertex_buffer->Lock(0, 0, (void**)&p_lock, 0);
+    memcpy(p_lock, verticies, sizeof(CUSTOMVERTEX) * 8);
+    this->vertex_buffer->Unlock();
+    p_lock = nullptr;
+    this->d3d9_device->SetStreamSource(0, this->vertex_buffer.get(), 0, sizeof(CUSTOMVERTEX));
+    this->d3d9_device->DrawPrimitive(D3DPT_LINELIST, 0, 4);
+    this->d3d9_device->SetStreamSource(0, nullptr, 0, 0);
+    delete[]verticies;
+    verticies = nullptr;
+}
+void renderer::draw_rectangle(const vec3& position, const vec3& size, const Color& c1, const Color& c2)
+{
+    CUSTOMVERTEX* verticies = new CUSTOMVERTEX[5];
+    verticies[0] = { position.x, position.y, position.z,  c1.to_dword() };
+    verticies[1] = { position.x + size.x, position.y, position.z,  c1.to_dword() };
+    verticies[2] = { position.x + size.x, position.y + size.y, position.z,  c1.to_dword() };
+    verticies[3] = { position.x , position.y + size.y, position.z,  c2.to_dword() };
+    verticies[4] = { position.x , position.y , position.z,  c2.to_dword() };
+    void* p_lock = nullptr;
+    this->vertex_buffer->Lock(0, 0, (void**)&p_lock, 0);
+    memcpy(p_lock, verticies, sizeof(CUSTOMVERTEX) * 5);
+    this->vertex_buffer->Unlock();
+    p_lock = nullptr;
+    this->d3d9_device->SetStreamSource(0, this->vertex_buffer.get(), 0, sizeof(CUSTOMVERTEX));
+    this->d3d9_device->DrawPrimitive(D3DPT_LINESTRIP, 0, 4);
     this->d3d9_device->SetStreamSource(0, nullptr, 0, 0);
     delete[]verticies;
     verticies = nullptr;
@@ -502,13 +630,89 @@ void renderer::draw_poly(vec3* vertices, int vertices_num, int poly_num, const C
     delete[] c_vertex;
     pointer = nullptr;
 }
-
 void renderer::set_poly_type(const D3DPRIMITIVETYPE& type)
 {
     this->current_poly_primitive = type;
 }
-
 void renderer::set_poly_color(const Color& color)
 {
     this->poly_color = color.to_dword();
+}
+void renderer::render_filled_rect(const vec2& position, const vec2& size, const Color& color, IDirect3DVertexBuffer9* buffer, LPDIRECT3DDEVICE9 dev)
+{
+    assert(buffer && "vertex buffer is nullptr");
+    const DWORD d_color = color.to_dword();
+    CUSTOMVERTEX2D* verticies = new CUSTOMVERTEX2D[4];
+    verticies[0] = { position.x, position.y, 0.f,1.f,  d_color };
+    verticies[1] = { position.x + size.x, position.y, 0.f,1.f,  d_color };
+    verticies[2] = { position.x, position.y + size.y, 0.f,1.f,  d_color };
+    verticies[3] = { position.x + size.x, position.y + size.y, 0.f,1.f,  d_color };
+    void* p_lock = nullptr;
+    buffer->Lock(0, 0, (void**)&p_lock, 0);
+    memcpy(p_lock, verticies, sizeof(CUSTOMVERTEX2D) * 4);
+    buffer->Unlock();
+    p_lock = nullptr;
+    dev->SetStreamSource(0, buffer, 0, sizeof(CUSTOMVERTEX2D));
+    dev->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
+    dev->SetStreamSource(0, nullptr, 0, 0);
+    delete[]verticies;
+    verticies = nullptr;
+}
+void renderer::render_rect(const vec2& position, const vec2& size, const Color& color, IDirect3DVertexBuffer9* buffer, LPDIRECT3DDEVICE9 dev)
+{
+    const DWORD d_color = color.to_dword();
+    CUSTOMVERTEX2D* verticies = new CUSTOMVERTEX2D[5];
+    verticies[0] = { position.x, position.y, 0.0f,1.f,  d_color };
+    verticies[1] = { position.x + size.x, position.y, 0.0f,1.f,  d_color };
+    verticies[2] = { position.x + size.x, position.y + size.y, 0.0f,1.f,  d_color };
+    verticies[3] = { position.x , position.y + size.y, 0.0f,1.f,  d_color };
+    verticies[4] = { position.x , position.y , 0.0f,1.f,  d_color };
+    void* p_lock = nullptr;
+    buffer->Lock(0, 0, (void**)&p_lock, 0);
+    memcpy(p_lock, verticies, sizeof(CUSTOMVERTEX2D) * 5);
+    buffer->Unlock();
+    p_lock = nullptr;
+    dev->SetStreamSource(0, buffer, 0, sizeof(CUSTOMVERTEX2D));
+    dev->DrawPrimitive(D3DPT_LINESTRIP, 0, 4);
+    dev->SetStreamSource(0, nullptr, 0, 0);
+    delete[]verticies;
+    verticies = nullptr;
+}
+void renderer::render_string(const vec2& pos, const std::string& message, const Color& color, bool outlined, bool centered, ID3DXFont* font)
+{
+
+}
+void renderer::render_string(const vec2& pos, const vec2& size, std::string message, const Color& color, bool outlined, bool centered, ID3DXFont* font)
+{
+    assert(font && "font is nulltr");
+    if (outlined)
+    {
+        float x = pos.x;
+        float y = pos.y;
+        render_string(vec2(pos.x - 1, pos.y - 1), message, Color::black(), false, false);
+        render_string(vec2(pos.x + 1, pos.y + 1), message, Color::black(), false, false);
+        render_string(vec2(pos.x - 1, pos.y + 1), message, Color::black(), false, false);
+        render_string(vec2(pos.x + 1, pos.y - 1), message, Color::black(), false, false);
+        render_string(pos, size, message, color, false, centered);
+    }
+    else {
+        float x = pos.x;
+        float y = pos.y;
+        const vec2 calc_size = calculate_txt_size(message, color, false, centered);
+        RECT rc = { x, y + size.y / 2 - calc_size.y / 2, x + size.x,y + size.y };
+        font->DrawTextA(NULL, message.c_str(), message.length(), &rc, DT_NOCLIP | (centered ? DT_CENTER : DT_LEFT), color.to_dword());
+    }
+}
+const vec2& renderer::calculate_txt_size(const std::string& message, const Color& color, bool outlined, bool centered, ID3DXFont* font)
+{
+    RECT rc = { 0, 0, 0,0 };
+    font->DrawTextA(NULL, message.c_str(), message.length(), &rc, DT_CALCRECT, color.to_dword());
+    return vec2((int)(rc.right - rc.left), (int)(rc.bottom - rc.top));
+}
+IDirect3DVertexBuffer9* d3d9_helper::create_vertex_buffer(size_t length, DWORD type, LPDIRECT3DDEVICE9 dev)
+{
+    IDirect3DVertexBuffer9* tmp = nullptr;
+    dev->CreateVertexBuffer(length, D3DUSAGE_WRITEONLY, type, D3DPOOL_MANAGED, &tmp, nullptr);
+    assert(tmp && "Failed to create vertex buffer");
+    return tmp;
 }

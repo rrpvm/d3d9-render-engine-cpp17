@@ -19,12 +19,12 @@
     <Filter Include="render">
       <UniqueIdentifier>{d12061a9-10a5-4276-86ef-f0cf4c215903}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GUI2D">
+      <UniqueIdentifier>{6f8d015b-c9c6-43b2-8298-fc4bd1203ee0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="helpers\container.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="WindowManager.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="math\vec2.hpp">
@@ -38,6 +38,36 @@
     </ClInclude>
     <ClInclude Include="vec3.hpp">
       <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugUI.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui2D.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI2D\GComponent.hpp">
+      <Filter>GUI2D</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI2D\GWindow.hpp">
+      <Filter>GUI2D</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI2D\GuiDrawManager.hpp">
+      <Filter>GUI2D</Filter>
+    </ClInclude>
+    <ClInclude Include="GChild.hpp">
+      <Filter>GUI2D</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI2D\GRenderable.hpp">
+      <Filter>GUI2D</Filter>
+    </ClInclude>
+    <ClInclude Include="GCheckBox.hpp">
+      <Filter>GUI2D</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowManager.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI2D\GInput.hpp">
+      <Filter>GUI2D</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -55,6 +85,33 @@
     </ClCompile>
     <ClCompile Include="vec3.cpp">
       <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugUI.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="Gui2D.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI2D\GWindow.cpp">
+      <Filter>GUI2D</Filter>
+    </ClCompile>
+    <ClCompile Include="GChild.cpp">
+      <Filter>GUI2D</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI2D\GuiDrawManager.cpp">
+      <Filter>GUI2D</Filter>
+    </ClCompile>
+    <ClCompile Include="GRenderable.cpp">
+      <Filter>GUI2D</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI2D\GComponent.cpp">
+      <Filter>GUI2D</Filter>
+    </ClCompile>
+    <ClCompile Include="GCheckBox.cpp">
+      <Filter>GUI2D</Filter>
+    </ClCompile>
+    <ClCompile Include="GInput.cpp">
+      <Filter>GUI2D</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
